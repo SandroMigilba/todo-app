@@ -1,82 +1,57 @@
 <?php
-session_start();
-if(!isset($_SESSION['user_id'])){ header('Location: login.php'); exit; }
+include 'config.php';
 
-require 'db.php'; // koneksi MySQL
+if (isset($_SESSION['user_id'])) header("Location: home.php");
 
-$user_id = (int)$_SESSION['user_id'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+  $username_email = $_POST['username_email'];
+  $password = $_POST['password'];
 
-// Siapkan dan jalankan query
-$stmt = $db->prepare('SELECT * FROM tasks WHERE user_id = :uid ORDER BY created_at DESC');
-$stmt->execute([':uid'=>$user_id]);
-$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $sql = "SELECT * FROM users WHERE username='$username_email' OR email='$username_email'";
+  $result = mysqli_query($conn, $sql);
+
+  if ($result && mysqli_num_rows($result) > 0) {
+    $user = mysqli_fetch_assoc($result);
+    if (password_verify($password, $user['password'])) {
+      $_SESSION['user_id'] = $user['id'];
+      $_SESSION['username'] = $user['username'];
+      header("Location: home.php");
+      exit;
+    } else {
+      $error = "⚠️ Password salah!";
+    }
+  } else {
+    $error = "⚠️ Username atau email tidak ditemukan!";
+  }
+}
 ?>
-
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard - Todo</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Login - ToDo App</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
-<div class="container">
-<aside class="sidebar">
-<div class="logo">Todo<span style="color:#0077e6">App</span></div>
-<ul class="nav">
-<li><a href="index.php" class="active">Dashboard</a></li>
-<li><a href="#">Tasks</a></li>
-<li><a href="#">Profile</a></li>
-<li><a href="logout.php">Logout</a></li>
-</ul>
-<div style="margin-top:18px" class="small">Signed in as <strong><?php echo htmlspecialchars($_SESSION['username']) ?></strong></div>
-</aside>
-<main class="main">
-<div class="header">
-<div>
-<div class="h1">My Tasks</div>
-<div class="small">Manage your daily to-dos</div>
-</div>
-<div class="profile">
-<div class="avatar"><?php echo strtoupper(substr($_SESSION['username'],0,1)) ?></div>
-</div>
-</div>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Selamat Datang 👋</h2>
+      <p class="subtitle">Masuk ke akun ToDo App kamu</p>
 
+      <?php if(isset($error)) echo "<div class='error-box'>$error</div>"; ?>
 
-<div class="card">
-<form class="form" action="add_task.php" method="post">
-<input class="input" name="title" placeholder="Tambah tugas baru..." required>
-<button class="btn">Tambah</button>
-</form>
-</div>
+      <form method="POST">
+        <div class="form-group">
+          <input type="text" name="username_email" placeholder="Username atau Email" required>
+        </div>
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn">Masuk</button>
+      </form>
 
-
-<div style="height:18px"></div>
-
-
-<?php if(!$tasks): ?>
-<div class="card"><div class="small">Belum ada tugas. Tambah tugas untuk memulai.</div></div>
-<?php else: ?>
-<?php foreach($tasks as $t): ?>
-<div class="task card">
-<div>
-<div style="font-weight:600"><?php echo htmlspecialchars($t['title']) ?></div>
-<div class="meta"><?php echo date('d M Y H:i', strtotime($t['created_at'])) ?></div>
-</div>
-<div style="display:flex;gap:8px;align-items:center">
-<?php if($t['is_done']): ?>
-<span class="badge">Done</span>
-<?php else: ?>
-<a href="edit_task.php?id=<?php echo $t['id'] ?>" class="small">Edit</a>
-<?php endif; ?>
-<a href="delete_task.php?id=<?php echo $t['id'] ?>" class="small">Hapus</a>
-</div>
-</div>
-<?php endforeach; ?>
-<?php endif; ?>
-
-
-</main>
-</div>
+      <p class="bottom-text">Belum punya akun? <a href="register.php">Daftar</a></p>
+    </div>
+  </div>
 </body>
 </html>
