@@ -14,7 +14,7 @@ $result = mysqli_query($conn, "SELECT * FROM todos WHERE user_id=$user_id ORDER 
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <h3>📝 ToDo App</h3>
       <div class="menu">
@@ -28,8 +28,13 @@ $result = mysqli_query($conn, "SELECT * FROM todos WHERE user_id=$user_id ORDER 
   </div>
 
   <!-- Konten Utama -->
-  <div class="content">
-    <h2>Halo, <?= htmlspecialchars($_SESSION['username']) ?> 👋</h2>
+  <div class="content" id="content">
+    <div class="toggle-btn-hide">
+      <button class="toggle-btn" onclick="toggleSidebar()">
+        <img src="img/icon-menu.png" alt="" style="width: 30px">
+      </button>
+      <h2>Halo, <?= htmlspecialchars($_SESSION['username']) ?> 👋</h2>
+    </div>
 
     <!-- <div class= todo-form-wrap> -->
     <form action="add_todo.php" method="POST" class="todo-form">
@@ -80,5 +85,7 @@ $result = mysqli_query($conn, "SELECT * FROM todos WHERE user_id=$user_id ORDER 
       });
     });
   </script>
+
+  <script src="assets/script.js"></script>
 </body>
 </html>
