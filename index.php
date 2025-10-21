@@ -1,4 +1,4 @@
-<?ph
+<?php
 include 'config.php';
 
 if (isset($_SESSION['user_id'])) header("Location: home.php");
@@ -55,4 +55,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   </div>
 </body>
 </html>
+
 
